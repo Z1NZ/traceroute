@@ -1,25 +1,4 @@
-#include <ft_ping.h>
-
-
-/*
-	exemple de recuperation de valeur sur ping
-void	ft_opt_i(char *option)
-{
-	char *tmp;
-
-	tmp = option;
-	while(ft_isdigit(*tmp) == 1)
-		tmp++;
-	if (*tmp != '\0')
-	{
-		fprintf(stderr, "%s","ping: bad timing interval" );
-		exit(-1);
-	}
-	else
-		g_env.interval = ft_atoi(option);
-}
-*/
-
+#include <ft_traceroute.h>
 
 int		ft_option(char ***option)
 {
@@ -36,14 +15,7 @@ int		ft_option(char ***option)
 			{
 
 				if (***option == 'h')
-					opt |= OPT_H;     // exemple de recuperation de flag
-				// else if (***option == 'i')
-				// {
-				// 	opt |= OPT_I;
-				// 	++*option;   exemple comment recupere de option sur ping 
-				// 	ft_opt_i(**option);
-				// 	break ;
-				// }
+					opt |= OPT_H;
 				else
 					return(-1);
 				++**option;

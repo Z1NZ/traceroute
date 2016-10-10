@@ -22,12 +22,8 @@
 ** define Flag option
 */
 #define CHECK_BIT(var,pos)	(var & pos)
-#define OPT_V				1
-#define OPT_H				2
-#define OPT_I				4
-#define OPT_T				8
-#define OPT_Q				16
-#define OPT_A				32
+#define OPT_H				1
+
 
 #define ICMP_ECHOREPLY		0
 #define ICMP_ECHOREQ		8
@@ -50,11 +46,7 @@ typedef struct			s_env
 	struct packet		*pack;
 	char				*host;
 	u_long				timer;
-	unsigned long		tmin;
-	unsigned long		tmax;
-	u_long				tsum;
-	u_long				tsum2;
-	struct timeval		tr;
+
 }						t_env;
 
 struct					packet

@@ -17,14 +17,14 @@ SRCS	= $(addprefix $(SRCDIR), $(SRC))
 all : $(NAME)
 
 $(NAME):
-	make -C libft/
+	@make -C libft/
 	@$(CC) $(SRCS) $(LDFLAGS) -L./libft -lft -o $(NAME) 
 clean:
 	@$(RM) $(OBJS)
-	make clean -C libft/ 
+	@make clean -C libft/ 
 fclean: clean
 	@$(RM) $(NAME)
-	make fclean -C libft/
+	@make fclean -C libft/
 re: fclean all
 
 .PHONY: all clean fclean re

@@ -1,27 +1,7 @@
-#include <ft_ping.h>
+#include <ft_traceroute.h>
 #include <limits.h>
 #include <math.h>
 
-
-uint64_t mysqrt (uint64_t a)
-{
-  uint64_t min = 0;
-  uint64_t max = ((uint64_t) 1) << 32;
-  while(1)
-    {
-       if (max <= 1 + min)
-         return min;           
-       uint64_t sqt = min + (max - min)/2;
-       uint64_t sq = sqt*sqt;
-       if (sq == a) 
-         return sqt;
-
-       if (sq > a)
-         max = sqt;
-       else
-         min = sqt;
- 	}
-}
 
 struct addrinfo *ft_get_info(char *ptr, int opt)
 {
@@ -67,36 +47,6 @@ void	tvsub(struct timeval *out, struct timeval*in)
 static void 	ft_out(int i)
 {
 	(void)i;
-	long double tmp;
-
-	signal(SIGINT, SIG_IGN);
-
-	printf("\n");
-	printf("--- %s ping statistics ---\n", g_env.host);
-	printf("%ld packets transmitted, ", g_env.seq);
-	printf("%ld received, ", g_env.recvpack);
-	if (g_env.error)
-	printf("+%ld errors, ", g_env.error);
-
-	if (g_env.seq)
-	{
-		if (g_env.recvpack > g_env.seq)
-			printf("-- somebody's printing up packets!");
-		else
-			printf("%d%% packet loss, time=%lums", (int)(((g_env.seq - g_env.recvpack) * 100) / g_env.seq), (g_env.timer / 10000));
-	}
-	printf("\n");
-	if (g_env.recvpack > 0)
-	{
-		printf("rtt min/avg/max = %ld.%ld/%lu.%ld/%ld.%ld/", g_env.tmin/1000, g_env.tmin%1000,
-		(g_env.tsum / (g_env.recvpack))/1000, (g_env.tsum / (g_env.recvpack))%1000, g_env.tmax/1000, g_env.tmax%1000);
-		g_env.tsum /= g_env.recvpack;
-		g_env.tsum2 /= g_env.recvpack;
-		tmp = mysqrt(g_env.tsum2 - g_env.tsum * g_env.tsum);
-		printf("%.3LF ms\n", tmp/1000);
-	}
-	if (g_env.recvpack == 0)
-		exit(1);
 	exit (0);
 }
 

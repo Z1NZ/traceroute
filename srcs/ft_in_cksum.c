@@ -1,4 +1,4 @@
-#include <ft_ping.h>
+#include <ft_traceroute.h>
 
 u_short		ft_in_cksum(unsigned short *addr, int len)
 {
