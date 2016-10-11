@@ -52,8 +52,8 @@ typedef struct			s_env
 struct					packet
 {
 	struct				ip ip;
-	struct				icmphdr hdr;
-	char				msg[PACKETSIZE - (sizeof(struct icmphdr) + sizeof (struct ip))];
+	struct				icmp hdr;
+	char				msg[PACKETSIZE - (sizeof(struct icmp) + sizeof (struct ip))];
 };
 
 struct					recv_packet

@@ -11,6 +11,6 @@ void	ft_error(void)
 
 void	ft_how_use(void)
 {
-	printf("%s\n", "Usage: ping [-ahvq] [-i interval] [-t ttl] destination\n");
+	printf("%s\n", "Usage: traceroute [-ahvq] [-i interval] [-t ttl] destination\n");
 	exit(-1);	
 }

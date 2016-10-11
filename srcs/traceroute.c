@@ -3,6 +3,18 @@
 #include <math.h>
 
 
+
+unsigned short
+csum (unsigned short *buf, int nwords)
+{
+  unsigned long sum;
+  for (sum = 0; nwords > 0; nwords--)
+    sum += *buf++;
+  sum = (sum >> 16) + (sum & 0xffff);
+  sum += (sum >> 16);
+  return ~sum;
+}
+
 struct addrinfo *ft_get_info(char *ptr, int opt)
 {
 	struct addrinfo hints;
@@ -53,7 +65,7 @@ static void 	ft_out(int i)
 static void	ft_ping_old(int i)
 {
 	(void)i;
-	g_env.seq++;
+
 	int len;
 
 	struct sockaddr_in server;
@@ -67,16 +79,11 @@ static void	ft_ping_old(int i)
 	g_env.pack->ip.ip_v = 4;
 	g_env.pack->ip.ip_tos = 0;
 	g_env.pack->ip.ip_len = 20 + 8;
-	g_env.pack->ip.ip_id = 10000;
+	g_env.pack->ip.ip_id = htons (getpid());;
 	g_env.pack->ip.ip_off = 0;
-	g_env.pack->ip.ip_ttl = 0;
 	g_env.pack->ip.ip_p = IPPROTO_ICMP;
 	inet_pton(AF_INET, g_env.name, &(g_env.pack->ip.ip_dst));
-	g_env.pack->ip.ip_sum = ft_in_cksum((unsigned short*)&(g_env.pack->ip), sizeof(struct ip));
-	g_env.pack->hdr.type = ICMP_ECHOREQ;
-	g_env.pack->hdr.un.echo.id = getpid();
-	g_env.pack->hdr.un.echo.sequence = g_env.seq;
-	g_env.pack->hdr.checksum =  ft_in_cksum((unsigned short*)&(g_env.pack->hdr), sizeof(struct icmphdr));
+
 	iov[0].iov_base = &(g_env.pack->hdr);
 	iov[0].iov_len = sizeof(*g_env.pack);
 	msg.msg_iov = iov;
@@ -87,20 +94,41 @@ static void	ft_ping_old(int i)
 	int toto;
 	if (setsockopt(g_env.sd, IPPROTO_IP, IP_HDRINCL, (const int *)&toto, sizeof(toto)) < 0)
 		perror("setsocket() failed ");
-	if (sendto (g_env.sd, g_env.pack, PACKETSIZE, 0, (struct sockaddr *)&server, sizeof (struct sockaddr)) < 0)
+	i = 0;
+	while(g_env.ttl < 255)
 	{
-		perror ("sendto() failed ");
-		alarm(g_env.interval);
-		return ;
-	}
-	jump:
-		len = recvmsg(g_env.sd, &msg, 0);
-	if (len)
-	{
-		p = (struct recv_packet *)msg.msg_iov[0].iov_base;
-		if (p->hdr.icmp_hun.ih_idseq.icd_id != getpid() && (p->hdr.icmp_code != ICMP_ECHOREPLY && p->hdr.icmp_code != ICMP_FILTER))
-			goto jump;
-		printf("%zd bytes from %s: icmp_seq=%u ttl=%d\n", msg.msg_iov[0].iov_len, g_env.name, p->hdr.icmp_hun.ih_idseq.icd_seq, p->ip.ip_ttl);
+		g_env.pack->ip.ip_ttl = ++g_env.ttl;
+
+		g_env.pack->ip.ip_sum = ft_in_cksum((unsigned short*)&(g_env.pack->ip), sizeof(struct ip));
+		i = 0;
+		while(i < 3)
+		{
+			memset(&(g_env.pack->hdr), '\0', sizeof(g_env.pack->hdr));
+			g_env.pack->hdr.icmp_type = ICMP_ECHOREQ;
+			g_env.pack->hdr.icmp_code = 0;
+			g_env.pack->hdr.icmp_cksum = 0;
+			g_env.pack->hdr.icmp_cksum =  ntohs(0x0810);		
+			if (sendto (g_env.sd, g_env.pack, PACKETSIZE, 0, (struct sockaddr *)&server, sizeof (struct sockaddr)) < 0)
+			{
+				perror ("sendto() failed ");
+				return ;
+			}
+			jump:
+				len = recvmsg(g_env.sd, &msg, 0);
+			if (len)
+			{
+				p = (struct recv_packet *)msg.msg_iov[0].iov_base;
+				if (p->ip.ip_id != g_env.pack->ip.ip_id && (p->hdr.icmp_code != ICMP_ECHOREPLY && p->hdr.icmp_type != 3))
+					goto jump;
+				if (i == 0)
+					printf("%d == > %s\t", g_env.ttl, inet_ntoa(p->ip.ip_src));
+				else if (i == 1)
+					printf("%s\t","ok");
+				else
+					printf("%s\n","ok");
+			}
+			i++;
+		}
 	}
 }
 
@@ -116,7 +144,5 @@ int		ft_traceroute(int opt, char *ptr)
 	g_env.opt = opt;
 	signal(SIGINT, ft_out);
 		ft_ping_old(0);
-	while(1)
-		;
 	return(0);
 }
