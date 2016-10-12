@@ -67,7 +67,7 @@ static void	ft_ping_old(int i)
 	(void)i;
 
 	int len;
-
+	char buf[1024];
 	struct sockaddr_in server;
 	struct  msghdr msg;
 	struct iovec iov[1]; /* Data array */
@@ -79,7 +79,6 @@ static void	ft_ping_old(int i)
 	g_env.pack->ip.ip_v = 4;
 	g_env.pack->ip.ip_tos = 0;
 	g_env.pack->ip.ip_len = 20 + 8;
-	g_env.pack->ip.ip_id = htons (getpid());;
 	g_env.pack->ip.ip_off = 0;
 	g_env.pack->ip.ip_p = IPPROTO_ICMP;
 	inet_pton(AF_INET, g_env.name, &(g_env.pack->ip.ip_dst));
@@ -95,9 +94,12 @@ static void	ft_ping_old(int i)
 	if (setsockopt(g_env.sd, IPPROTO_IP, IP_HDRINCL, (const int *)&toto, sizeof(toto)) < 0)
 		perror("setsocket() failed ");
 	i = 0;
+			struct sockaddr_storage sender;
+			socklen_t sendsize = sizeof(sender);
 	while(g_env.ttl < 255)
 	{
 		g_env.pack->ip.ip_ttl = ++g_env.ttl;
+		g_env.pack->ip.ip_id = htons(getpid() - g_env.ttl);
 
 		g_env.pack->ip.ip_sum = ft_in_cksum((unsigned short*)&(g_env.pack->ip), sizeof(struct ip));
 		i = 0;
@@ -106,18 +108,23 @@ static void	ft_ping_old(int i)
 			memset(&(g_env.pack->hdr), '\0', sizeof(g_env.pack->hdr));
 			g_env.pack->hdr.icmp_type = ICMP_ECHOREQ;
 			g_env.pack->hdr.icmp_code = 0;
+			g_env.pack->hdr.icmp_id = htons(getpid() - g_env.ttl);
+			g_env.pack->hdr.icmp_seq = i;
 			g_env.pack->hdr.icmp_cksum = 0;
-			g_env.pack->hdr.icmp_cksum =  ntohs(0x0810);		
+			g_env.pack->hdr.icmp_cksum =  ft_in_cksum((unsigned short*)&(g_env.pack->hdr), sizeof(struct icmp));		
 			if (sendto (g_env.sd, g_env.pack, PACKETSIZE, 0, (struct sockaddr *)&server, sizeof (struct sockaddr)) < 0)
 			{
 				perror ("sendto() failed ");
 				return ;
 			}
+
 			jump:
-				len = recvmsg(g_env.sd, &msg, 0);
+			bzero(&sender, sizeof(sender));
+			bzero(&buf, sizeof(1024));
+			len = recvfrom(g_env.sd, buf, sizeof(buf), 0, (struct sockaddr*)&sender, &sendsize);
 			if (len)
 			{
-				p = (struct recv_packet *)msg.msg_iov[0].iov_base;
+				p = (struct recv_packet *)buf;
 				if (p->ip.ip_id != g_env.pack->ip.ip_id && (p->hdr.icmp_code != ICMP_ECHOREPLY && p->hdr.icmp_type != 3))
 					goto jump;
 				if (i == 0)
@@ -129,6 +136,8 @@ static void	ft_ping_old(int i)
 			}
 			i++;
 		}
+		if (p->ip.ip_src.s_addr == g_env.pack->ip.ip_dst.s_addr)
+			break ;
 	}
 }
 
