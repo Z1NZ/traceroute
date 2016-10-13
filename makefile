@@ -1,4 +1,5 @@
-CC    = gcc  -Wall -Wextra -Werror
+CC    = gcc  -Wall -Wextra -Werror -g 
+# -fsanitize=address
 
 LDFLAGS	= -I./includes/ -I./libft/includes -lncurses
 

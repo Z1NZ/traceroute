@@ -37,7 +37,7 @@
 typedef struct			s_env
 {
 	int					opt;
-	int					ttl;
+	ushort			ttl;
 	long int			sd;
 	unsigned long int	seq;
 	int					tmp;
