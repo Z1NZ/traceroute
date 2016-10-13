@@ -1,31 +1,48 @@
-CC    = gcc  -Wall -Wextra -Werror -g 
-# -fsanitize=address
+#	Library output
+NAME = ft_traceroute
 
-LDFLAGS	= -I./includes/ -I./libft/includes -lncurses
+#	GCC flags
+CFLAGS = -Wall -Wextra -Werror -lncurses
 
-RM    = rm -f
+#	Includes directories
+INC_TR = includes
+INCLUDES += $(addprefix -iquote , $(INC_TR))
 
-NAME    = ft_traceroute
+#	Sources
+RT_SOURCES = $(shell find lib | grep "\.c$$" | sed "s/\.c$$//g")
+SRCS = $(addsuffix .c, $(RT_SOURCES))
+OBJS = $(SRCS:.c=.o)
 
-SRC    = main.c\
-		traceroute.c\
-		ft_in_cksum.c\
-		ft_error.c\
+all: $(NAME)
 
-OBJS    = $(SRC:.c=.o)
-SRCDIR 	= ./srcs/
-SRCS	= $(addprefix $(SRCDIR), $(SRC))
-all : $(NAME)
+$(NAME): $(OBJS)
+	@echo ">>>>> Génération de TRACEROUTE"
+	@gcc $(OBJS) -o $(NAME)
+	@echo "Terminée"
 
-$(NAME):
-	@make -C libft/
-	@$(CC) $(SRCS) $(LDFLAGS) -L./libft -lft -o $(NAME) 
+# To obtain object files
+%.o: %.c
+	@$(CC) -c $(CFLAGS) $(INCLUDES) $< -o $@
+
+# To remove generated files
 clean:
+	@echo "RM\ttous les objects (.o)"
 	@$(RM) $(OBJS)
-	@make clean -C libft/ 
+
 fclean: clean
+	@echo "RM\tprojet ($(NAME))"
 	@$(RM) $(NAME)
-	@make fclean -C libft/
+
+lftclean:
+	make -C libft clean
+
+lftfclean:
+	make -C libft fclean
+
 re: fclean all
 
-.PHONY: all clean fclean re
+git:
+	@git add .
+	@echo "Enter Your Commit :"
+	@read var1 ; git commit -m "$$var1"
+	@git push

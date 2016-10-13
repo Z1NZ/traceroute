@@ -13,7 +13,6 @@
 #include <sys/ioctl.h>
 #include <net/if.h>
 #include <errno.h>
-#include <libft.h>
 #include <sys/time.h>
 #include <signal.h>
 #include <curses.h>
@@ -85,3 +84,14 @@ int						ft_traceroute(int opt, char *ptr);
 void					ft_error(void);
 void					ft_how_use(void);
 
+/*
+** libft
+*/
+int		ft_atoi(const char *str);
+void	ft_bzero(void *s, int n);
+int		ft_isdigit(int c);
+int		ft_isspace(int c);
+void	*ft_memalloc(size_t size);
+void	*ft_memcpy(void *s1, const void *s2, size_t n);
+void	*ft_memset(void *b, int c, size_t len);
+size_t	ft_strlen(const char *s);

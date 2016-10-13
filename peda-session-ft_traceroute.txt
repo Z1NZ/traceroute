@@ -1,3 +1,0 @@
-break ft_ping_old
-break main
-
