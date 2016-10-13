@@ -9,7 +9,7 @@ NAME    = ft_traceroute
 SRC    = main.c\
 		traceroute.c\
 		ft_in_cksum.c\
-		ft_error.c
+		ft_error.c\
 
 OBJS    = $(SRC:.c=.o)
 SRCDIR 	= ./srcs/

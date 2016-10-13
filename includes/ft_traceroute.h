@@ -23,30 +23,32 @@
 */
 #define CHECK_BIT(var,pos)	(var & pos)
 #define OPT_H				1
+#define OPT_W				2
+
 
 
 #define ICMP_ECHOREPLY		0
 #define ICMP_ECHOREQ		8
 #define ICMP_FILTER			13
-#define REQ_DATASIZE		64
+#define REQ_DATASIZE		160
 #define PACKETSIZE			64
 
 
 typedef struct			s_env
 {
-	unsigned long int	error;
 	int					opt;
 	int					ttl;
-	int					interval;
 	long int			sd;
 	unsigned long int	seq;
+	int					tmp;
 	unsigned long int	recvpack;
 	char				*name;
+	int					hops;
 	struct addrinfo		*pinfo;
 	struct packet		*pack;
+	struct timeval		timer;
 	char				*host;
-	u_long				timer;
-
+	fd_set				rw;
 }						t_env;
 
 struct					packet
@@ -59,8 +61,9 @@ struct					packet
 struct					recv_packet
 {
 	struct ip			ip;
-	struct icmp			hdr;
-	char				msg[PACKETSIZE-(sizeof(struct icmphdr) + sizeof( struct iphdr))];
+	struct icmp			icmp;
+	struct icmp			icmp_recv;
+	// char				msg[PACKETSIZE-(sizeof(struct icmp) + sizeof(struct icmp) + sizeof( struct ip))];
 };
 
 t_env g_env;

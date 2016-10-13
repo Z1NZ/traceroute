@@ -1,5 +1,38 @@
 #include <ft_traceroute.h>
 
+
+void	ft_opt_h(char *option)
+{
+	char *tmp;
+
+	tmp = option;
+	while(ft_isdigit(*tmp) == 1)
+		tmp++;
+	if (*tmp != '\0')
+	{
+		fprintf(stderr, "%s `%s`" ,"traceroute: invalid hops value", option);
+		exit(-1);
+	}
+	else
+		g_env.hops = ft_atoi(option);
+}
+
+void	ft_opt_w(char *option)
+{
+	char *tmp;
+
+	tmp = option;
+	while(ft_isdigit(*tmp) == 1)
+		tmp++;
+	if (*tmp != '\0')
+	{
+		fprintf(stderr, "%s `%s`" ,"traceroute: invalid wait value", option);
+		exit(-1);
+	}
+	else
+		g_env.tmp = ft_atoi(option);
+}
+
 int		ft_option(char ***option)
 {
 	int	opt;
@@ -15,7 +48,19 @@ int		ft_option(char ***option)
 			{
 
 				if (***option == 'h')
+				{
 					opt |= OPT_H;
+					++*option;
+					ft_opt_h(**option);
+					break ;
+				}
+				else if (***option == 'w')
+				{
+					opt |= OPT_W;
+					++*option;
+					ft_opt_w(**option);
+					break ;
+				}
 				else
 					return(-1);
 				++**option;
