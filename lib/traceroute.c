@@ -65,7 +65,7 @@ static void	ft_ping_old(int i)
 	server.sin_family = g_env.pinfo->ai_family;
 	inet_pton(AF_INET, g_env.name, &(server.sin_addr));
 	i = 0;
-	while(g_env.ttl < 255)
+	while(g_env.ttl < g_env.hops)
 	{
 		g_env.pack->ip.ip_ttl = ++g_env.ttl;
 		g_env.pack->ip.ip_id = ntohs(getpid() - g_env.ttl);
