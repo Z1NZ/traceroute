@@ -22,7 +22,7 @@ struct addrinfo *ft_get_info(char *ptr, int opt)
 	{
 		if (errno == 0)
 		{
-			fprintf(stderr ,"%s%s", "ping: unknown host ", ptr);
+			fprintf(stderr ,"%s%s", "traceroute: unknown host ", ptr);
 			exit(-1);
 		}
 		else
@@ -182,12 +182,13 @@ int		ft_traceroute(int opt, char *ptr)
 		printf("%s\n", "socket");
 		ft_error();
 	}
-	if (!CHECK_BIT(opt, OPT_H))
-		g_env.hops = 255;
+	if (!CHECK_BIT(opt, OPT_M))
+		g_env.hops = 64;
 	if (!CHECK_BIT(opt, OPT_W))
 		g_env.tmp = 3;
 	g_env.host = ptr;
 	g_env.opt = opt;
+	printf("%s%s (%s), %d hops max\n", "traceroute to ", ptr, g_env.name, g_env.hops);
 	ft_ping_old(0);
 	return(0);
 }

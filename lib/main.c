@@ -1,11 +1,21 @@
 #include "ft_traceroute.h"
 
-
-void	ft_opt_h(char *option)
+void	ft_opt_h(void)
+{
+	printf("%s\n", "Usage: traceroute [-m NUM] [-w NUM] HOST");
+	exit(-1);
+}
+void	ft_opt_m(char *option)
 {
 	char *tmp;
 
+
 	tmp = option;
+	if (option == NULL)
+	{
+		fprintf(stderr, "%s `%s`" ,"traceroute: invalid hops value", option);
+		exit(-1);
+	}
 	while(ft_isdigit(*tmp) == 1)
 		tmp++;
 	if (*tmp != '\0')
@@ -22,6 +32,11 @@ void	ft_opt_w(char *option)
 	char *tmp;
 
 	tmp = option;
+	if (option == NULL)
+	{
+		fprintf(stderr, "%s `%s`" ,"traceroute: invalid hops value", option);
+		exit(-1);
+	}
 	while(ft_isdigit(*tmp) == 1)
 		tmp++;
 	if (*tmp != '\0')
@@ -39,6 +54,11 @@ int		ft_option(char ***option)
 
 
 	opt = 0;
+	if (getuid())
+	{
+		printf("root require\n");
+		return 0;
+	}
 	if (***option == '-')
 	{
 		while (*option && **option && ***option == '-')
@@ -47,11 +67,13 @@ int		ft_option(char ***option)
 			while(***option != '\0')
 			{
 
-				if (***option == 'h')
+				if ( ***option == 'h')
+					ft_opt_h();
+				else if (***option == 'm')
 				{
-					opt |= OPT_H;
+					opt |= OPT_M;
 					++*option;
-					ft_opt_h(**option);
+					ft_opt_m(**option);
 					break ;
 				}
 				else if (***option == 'w')

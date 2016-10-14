@@ -21,7 +21,7 @@
 ** define Flag option
 */
 #define CHECK_BIT(var,pos)	(var & pos)
-#define OPT_H				1
+#define OPT_M				1
 #define OPT_W				2
 
 
