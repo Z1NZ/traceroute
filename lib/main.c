@@ -54,11 +54,7 @@ int		ft_option(char ***option)
 
 
 	opt = 0;
-	if (getuid())
-	{
-		printf("root require\n");
-		return 0;
-	}
+
 	if (***option == '-')
 	{
 		while (*option && **option && ***option == '-')
@@ -102,6 +98,11 @@ int main(int argc, char *argv[])
 	int opt;
 	char **ptr;
 
+	if (getuid())
+	{
+		printf("root require\n");
+		return 0;
+	}
 	opt = 0;
 	if (argc > 1)
 	{

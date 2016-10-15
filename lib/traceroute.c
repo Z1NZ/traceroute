@@ -44,7 +44,6 @@ void	tvsub(struct timeval *out, struct timeval*in)
 
 static void	ft_ping_old(int i)
 {
-	int len;
 	double tmp;
 	struct timeval tp, tv;
 	struct recv_packet *p = NULL;
@@ -61,7 +60,6 @@ static void	ft_ping_old(int i)
 	g_env.pack->ip.ip_off = 0;
 	g_env.pack->ip.ip_p = IPPROTO_ICMP;
 	inet_pton(AF_INET, g_env.name, &(g_env.pack->ip.ip_dst));
-	len = 0;
 	server.sin_family = g_env.pinfo->ai_family;
 	inet_pton(AF_INET, g_env.name, &(server.sin_addr));
 	i = 0;
@@ -73,103 +71,103 @@ static void	ft_ping_old(int i)
 		if (setsockopt(g_env.sd, IPPROTO_IP, IP_HDRINCL, (const int *)&g_env.ttl, sizeof(g_env.ttl)) < 0)
 			perror("setsocket() failed ");
 		i = 0;
-		while(i < 3)
-		{
-			if (i == 0)
-				printf("  %d", g_env.ttl);
-			FD_ZERO(&(g_env.rw));
-			FD_SET(g_env.sd, &(g_env.rw));
-			g_env.timer.tv_usec = 0;
-			g_env.timer.tv_sec = g_env.tmp;
-			ft_memset(&(g_env.pack->hdr), '\0', sizeof(struct icmp));
-			g_env.pack->hdr.icmp_id = ntohs(getpid() - g_env.ttl);
-			g_env.pack->hdr.icmp_seq = i;
-			g_env.pack->hdr.icmp_type = ICMP_ECHOREQ;
-			g_env.pack->hdr.icmp_code = 0;
-			g_env.pack->hdr.icmp_cksum = 0;
-			g_env.pack->hdr.icmp_cksum =  ft_in_cksum((unsigned short*)&(g_env.pack->hdr), sizeof(struct icmp));	
-			gettimeofday(&tp, NULL);
-			if (sendto (g_env.sd, g_env.pack, sizeof(struct packet), 0, (struct sockaddr *)&server, sizeof (struct sockaddr_in)) < 0)
-			{
-				perror ("sendto() failed ");
-				return ;
-			}
-			select(g_env.sd + 1, &(g_env.rw), NULL, NULL, &(g_env.timer));
-			if (FD_ISSET(g_env.sd, &(g_env.rw)))
-			{
-						jump:
-						sendsize = sizeof(sender);
-						ft_bzero(&sender, sizeof(sender));
-						ft_bzero(&buf, sizeof(1024));
-						len = recvfrom(g_env.sd, buf, sizeof(buf), 0, (struct sockaddr*)&sender, &sendsize);
-						gettimeofday(&tv, NULL);
-						if (len)
+						while(i < 3)
 						{
-							p = (struct recv_packet *)buf;
-							if ((p->icmp.icmp_id == g_env.pack->hdr.icmp_id) || (p->icmp_recv.icmp_id == g_env.pack->hdr.icmp_id))
+							if (i == 0)
+								printf("  %d", g_env.ttl);
+							FD_ZERO(&(g_env.rw));
+							FD_SET(g_env.sd, &(g_env.rw));
+							g_env.timer.tv_usec = 0;
+							g_env.timer.tv_sec = g_env.tmp;
+							ft_memset(&(g_env.pack->hdr), '\0', sizeof(struct icmp));
+							g_env.pack->hdr.icmp_id = ntohs(getpid() - g_env.ttl);
+							g_env.pack->hdr.icmp_seq = i;
+							g_env.pack->hdr.icmp_type = ICMP_ECHOREQ;
+							g_env.pack->hdr.icmp_code = 0;
+							g_env.pack->hdr.icmp_cksum = 0;
+							g_env.pack->hdr.icmp_cksum =  ft_in_cksum((unsigned short*)&(g_env.pack->hdr), sizeof(struct icmp));	
+							gettimeofday(&tp, NULL);
+							sendsize = sizeof(sender);
+							ft_bzero(&sender, sizeof(sender));
+							ft_bzero(&buf, sizeof(1024));
+							if (sendto (g_env.sd, g_env.pack, sizeof(struct packet), 0, (struct sockaddr *)&server, sizeof (struct sockaddr_in)) < 0)
 							{
-								if (p->icmp.icmp_type == ICMP_ECHOREPLY || p->icmp.icmp_type == ICMP_TIME_EXCEEDED)
-								{
-									tvsub(&tv, &tp);
-									tmp = tv.tv_sec * 10000000L + tv.tv_usec;
-									if (i == 0)
-										printf("  %s  ", inet_ntoa(p->ip.ip_src));
-									printf("%.3f  ", tmp/1000);
-								}
-								else if(p->icmp.icmp_type == ICMP_DEST_UNREACH)
-								{
-									switch (p->icmp.icmp_code) {
-										case ICMP_UNREACH_PORT:
-											printf(" !");
-											break;
+								perror ("sendto() failed ");
+								return ;
+							}
+							if (select(g_env.sd + 1, &(g_env.rw), NULL, NULL, &(g_env.timer)) > 0)
+							{
+										jump:
+										if (recvfrom(g_env.sd, buf, sizeof(buf), 0, (struct sockaddr*)&sender, &sendsize))
+										{
+											p = (struct recv_packet *)buf;
+											gettimeofday(&tv, NULL);
+											if ((p->icmp.icmp_id == g_env.pack->hdr.icmp_id) || (p->icmp_recv.icmp_id == g_env.pack->hdr.icmp_id))
+											{
+												if (p->icmp.icmp_type == ICMP_ECHOREQ)
+													goto jump;
+												if (p->icmp.icmp_type == ICMP_ECHOREPLY || p->icmp.icmp_type == ICMP_TIME_EXCEEDED)
+												{
+													tvsub(&tv, &tp);
+													tmp = tv.tv_sec * 10000000L + tv.tv_usec;
+													if (i == 0)
+														printf("  %s  ", inet_ntoa(p->ip.ip_src));
+													printf("%.3f  ", tmp/1000);
+												}
+												else if(p->icmp.icmp_type == ICMP_DEST_UNREACH)
+												{
+													switch (p->icmp.icmp_code) {
+														case ICMP_UNREACH_PORT:
+															printf(" !");
+															break;
 
-										case ICMP_UNREACH_NET:
-											break;
+														case ICMP_UNREACH_NET:
+															break;
 
-										case ICMP_UNREACH_HOST:
-											printf(" !H");
-											break;
+														case ICMP_UNREACH_HOST:
+															printf(" !H");
+															break;
 
-										case ICMP_UNREACH_PROTOCOL:
-											printf(" !P");
-											break;
+														case ICMP_UNREACH_PROTOCOL:
+															printf(" !P");
+															break;
 
-										case ICMP_UNREACH_NEEDFRAG:
-											printf(" !F");
-											break;
+														case ICMP_UNREACH_NEEDFRAG:
+															printf(" !F");
+															break;
 
-										case ICMP_UNREACH_SRCFAIL:
-											printf(" !S");
-											break;
+														case ICMP_UNREACH_SRCFAIL:
+															printf(" !S");
+															break;
 
-										case ICMP_UNREACH_FILTER_PROHIB:
-											printf(" !X");
-											break;
+														case ICMP_UNREACH_FILTER_PROHIB:
+															printf(" !X");
+															break;
 
-										case ICMP_UNREACH_HOST_PRECEDENCE:
-											printf(" !V");
-											break;
+														case ICMP_UNREACH_HOST_PRECEDENCE:
+															printf(" !V");
+															break;
 
-										case ICMP_UNREACH_PRECEDENCE_CUTOFF:
-											printf(" !C");
-											break;
+														case ICMP_UNREACH_PRECEDENCE_CUTOFF:
+															printf(" !C");
+															break;
 
-										default:
-											printf(" !<%d>", p->icmp.icmp_code);
-											break;
-									}
-								}
+														default:
+															printf(" !<%d>", p->icmp.icmp_code);
+															break;
+													}
+												}
+											}
+											else
+												goto jump;
+										}
 							}
 							else
-								goto jump;
+								printf("  *");
+							if (i == 2)
+								printf("\n");
+							i++;
 						}
-			}
-			else
-				printf("  *");
-			if (i == 2)
-				printf("\n");
-			i++;
-		}
 		if (p && p->ip.ip_src.s_addr == g_env.pack->ip.ip_dst.s_addr)
 			break ;
 	}

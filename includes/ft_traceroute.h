@@ -36,8 +36,9 @@
 typedef struct			s_env
 {
 	int					opt;
-	ushort			ttl;
+	ushort				ttl;
 	long int			sd;
+	long int			sd_r;
 	unsigned long int	seq;
 	int					tmp;
 	unsigned long int	recvpack;
